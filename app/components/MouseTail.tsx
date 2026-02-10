@@ -23,8 +23,8 @@ export default function MouseTail() {
             const dy = e.clientY - lastPos.current.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Only spawn if mouse moved enough distance (e.g., 35px for clear spacing)
-            if (distance < 35) return;
+            // Only spawn if mouse moved enough distance (e.g., 25px for clear spacing)
+            if (distance < 25) return;
 
             lastPos.current = { x: e.clientX, y: e.clientY };
 
@@ -51,7 +51,7 @@ export default function MouseTail() {
                     .map((p) => ({
                         ...p,
                         opacity: p.opacity - 0.02, // Slower fade for longer tail
-                        scale: p.scale - 0.05,    // Slower shrink
+                        scale: p.scale - 0.005,    // Slower shrink
                     }))
                     .filter((p) => p.opacity > 0)
             );
