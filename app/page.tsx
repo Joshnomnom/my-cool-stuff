@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import MatrixCharacterPanel from "./components/MatrixCharacterPanel";
+import MouseTail from "./components/MouseTail";
 
 export default function Home() {
   const [shockTrigger, setShockTrigger] = useState(false);
@@ -44,6 +45,9 @@ export default function Home() {
 
         {/* Character Component */}
         <MatrixCharacterPanel shockTrigger={shockTrigger} />
+
+        {/* Mouse Trail */}
+        <MouseTail />
       </div>
 
       {/* Footer Info */}
