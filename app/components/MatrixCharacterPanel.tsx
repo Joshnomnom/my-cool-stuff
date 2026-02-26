@@ -7,7 +7,6 @@ type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
 type ImageState = "normal" | "blink" | "wink" | "open_mouth" | "shock";
 
 interface MatrixCharacterPanelProps {
-    shockTrigger: boolean;
 }
 
 const FRAME_WIDTH = 250;
@@ -15,9 +14,9 @@ const FRAME_HEIGHT = 250;
 const IMAGE_SIZE = 200; // Match frame size
 
 const MOVEMENT_STEP = 5; // Subtle movement
-const FPS = 5; // Keep low FPS
+const FPS = 3; // Keep low FPS
 
-export default function MatrixCharacterPanel({ shockTrigger }: MatrixCharacterPanelProps) {
+export default function MatrixCharacterPanel() {
     // Start centered
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [direction, setDirection] = useState<Direction>("RIGHT");
@@ -33,13 +32,6 @@ export default function MatrixCharacterPanel({ shockTrigger }: MatrixCharacterPa
         shock: "/assets/pixel_shock.jpg",
     };
 
-    // Handle shock trigger
-    useEffect(() => {
-        if (shockTrigger) {
-            setImageState("shock");
-            setStateTimer(2);
-        }
-    }, [shockTrigger]);
 
     // Game Loop (Low FPS)
     useEffect(() => {
@@ -51,10 +43,20 @@ export default function MatrixCharacterPanel({ shockTrigger }: MatrixCharacterPa
                 setImageState("normal");
             }
 
-            // 2. Handle Blinking (Randomly if normal)
-            if (imageState === "normal" && Math.random() < 0.1) {
-                setImageState("blink");
-                setStateTimer(2);
+            // 2. Handle Expression Transitions (Randomly if normal)
+            if (imageState === "normal") {
+                const rand = Math.random();
+                if (rand < 0.05) { // 5% Blink (Common-ish)
+                    setImageState("blink");
+                    setStateTimer(2);
+                } else if (rand < 0.08) { // 3% Rare (Wink/Open Mouth)
+                    const rareAction = Math.random() > 0.5 ? "wink" : "open_mouth";
+                    setImageState(rareAction);
+                    setStateTimer(2);
+                } else if (rand < 0.10) { // 2% Ultra-Rare (Shock)
+                    setImageState("shock");
+                    setStateTimer(3); // Slightly longer for shock
+                }
             }
 
             // 3. Handle Movement (Jittering)
