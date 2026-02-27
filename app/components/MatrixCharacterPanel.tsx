@@ -9,9 +9,9 @@ type ImageState = "normal" | "blink" | "wink" | "open_mouth" | "shock";
 interface MatrixCharacterPanelProps {
 }
 
-const FRAME_WIDTH = 250;
-const FRAME_HEIGHT = 250;
-const IMAGE_SIZE = 200; // Match frame size
+const FRAME_WIDTH = 180;
+const FRAME_HEIGHT = 180;
+const IMAGE_SIZE = 180; // Match frame size
 
 const MOVEMENT_STEP = 5; // Subtle movement
 const FPS = 3; // Keep low FPS

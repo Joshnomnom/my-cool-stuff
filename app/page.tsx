@@ -10,6 +10,7 @@ import MatrixShopModal from "./components/MatrixShopModal";
 import MouseTail from "./components/MouseTail";
 import { auth, db } from "@/lib/firebase";
 import MatrixSoundSettingsModal from "./components/MatrixSoundSettingsModal";
+import MatrixScoreboardModal from "./components/MatrixScoreboardModal";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useAudioManager, SoundType } from "@/lib/audioManager";
@@ -48,6 +49,7 @@ export default function Home() {
   const [inventoryCapacityLevel, setInventoryCapacityLevel] = useState(1);
   const [yieldPulse, setYieldPulse] = useState<{ id: number; amount: number } | null>(null);
   const [isSoundSettingsOpen, setIsSoundSettingsOpen] = useState(false);
+  const [isScoreboardOpen, setIsScoreboardOpen] = useState(false);
 
   const {
     playSound,
@@ -208,9 +210,9 @@ export default function Home() {
       </div>
 
       {/* Global Header */}
-      <header className="relative z-20 px-[100px] py-6 flex justify-between items-center bg-black/40 backdrop-blur-sm border-b-2 border-[#1ba51a22]">
+      <header className="relative z-20 px-6 py-3 flex justify-between items-center bg-black/40 backdrop-blur-sm border-b-2 border-[#1ba51a22]">
         <div className="flex flex-col">
-          <h1 className="text-3xl font-bold tracking-tighter italic text-[#1ba51a] drop-shadow-[0_0_10px_#1ba51a44]">
+          <h1 className="text-xl font-bold tracking-tighter italic text-[#1ba51a] drop-shadow-[0_0_10px_#1ba51a44]">
             MYCOOLSTUFF
           </h1>
           <div className="text-[9px] opacity-40 uppercase tracking-widest mt-1">
@@ -270,27 +272,34 @@ export default function Home() {
         )}
       </header>
 
-      <div className="relative z-10 px-[100px] pt-8 flex-1 flex flex-row items-stretch gap-12 overflow-hidden w-full pb-12">
+      <div className="relative z-10 px-6 pt-4 flex-1 flex flex-row items-stretch gap-6 overflow-hidden w-full pb-6">
         {/* Left Column: Stats & Character */}
-        <div className="flex flex-col items-start gap-8 min-w-[350px]">
-          <div className="w-full space-y-4">
-            <div className="text-[10px] opacity-70 space-y-1 bg-[#1ba51a08] p-4 border-l-2 border-[#1ba51a44]">
-              <p className="flex justify-between"><span>CONNECTION_STATUS:</span> <span>STABLE</span></p>
-              <p className="flex justify-between"><span>ENCRYPTION:</span> <span>AES-256</span></p>
-              <p className="flex justify-between"><span>SECTOR:</span> <span>ZION_MAIN_GATE</span></p>
-            </div>
-
+        <div className="flex flex-col items-start gap-3 w-[240px] flex-shrink-0">
+          <div className="w-full space-y-2">
             {user && (
               <button
                 onClick={() => setIsInventoryOpen(true)}
-                className="w-full border border-[#1ba51a44] px-4 py-4 uppercase text-xs font-bold bg-[#1ba51a0a] hover:bg-[#1ba51a] hover:text-black transition-all group flex justify-between items-center relative overflow-hidden"
+                className="w-full border border-[#1ba51a44] px-3 py-2.5 uppercase text-[10px] font-bold bg-[#1ba51a0a] hover:bg-[#1ba51a] hover:text-black transition-all group flex justify-between items-center relative overflow-hidden"
               >
-                <div className="flex items-center gap-3 z-10">
-                  <span className="text-xl">⌬</span>
-                  <span className="tracking-[0.2em]">PERSONAL_INVENTORY</span>
+                <div className="flex items-center gap-2 z-10">
+                  <span className="text-base">⌬</span>
+                  <span className="tracking-[0.15em]">INVENTORY</span>
                 </div>
                 <span className="z-10 text-[9px] opacity-60">[{inventory.length}]</span>
-                <div className="absolute inset-x-0 bottom-0 h-1 bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <div className="absolute inset-x-0 bottom-0 h-0.5 bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+              </button>
+            )}
+            {user && (
+              <button
+                onClick={() => { playSound("CLICK"); setIsScoreboardOpen(true); }}
+                className="w-full border border-[#1ba51a44] px-3 py-2.5 uppercase text-[10px] font-bold bg-[#1ba51a0a] hover:bg-[#f4b400] hover:text-black hover:border-[#f4b400] transition-all group flex justify-between items-center relative overflow-hidden"
+              >
+                <div className="flex items-center gap-2 z-10">
+                  <span className="text-base">◈</span>
+                  <span className="tracking-[0.15em]">RANKINGS</span>
+                </div>
+                <span className="z-10 text-[9px] opacity-60">[LIVE]</span>
+                <div className="absolute inset-x-0 bottom-0 h-0.5 bg-[#f4b400] scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
               </button>
             )}
           </div>
@@ -300,9 +309,9 @@ export default function Home() {
             <MatrixCharacterPanel />
           </div>
 
-          <div className="mt-auto border-t border-[#1ba51a11] pt-4 w-full">
-            <div className="text-[9px] opacity-30 italic leading-relaxed uppercase">
-              "The Matrix is all around us. It is the world that has been pulled over your eyes to blind you from the truth."
+          <div className="mt-auto border-t border-[#1ba51a11] pt-3 w-full">
+            <div className="text-[8px] opacity-20 italic leading-relaxed uppercase">
+              "There is no spoon."
             </div>
           </div>
         </div>
@@ -385,6 +394,13 @@ export default function Home() {
       <MatrixProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
+      />
+
+      {/* Scoreboard Modal */}
+      <MatrixScoreboardModal
+        isOpen={isScoreboardOpen}
+        onClose={() => setIsScoreboardOpen(false)}
+        playSound={playSound}
       />
     </main>
   );

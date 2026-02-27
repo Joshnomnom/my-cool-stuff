@@ -118,9 +118,9 @@ export default function MatrixStatusPanel({
                 {/* Shop Button */}
                 <button
                     onClick={onOpenShop}
-                    className="w-full border-2 border-[#1ba51a] py-6 uppercase font-bold text-lg tracking-[0.4em] hover:bg-[#1ba51a] hover:text-black transition-all shadow-[0_0_30px_#1ba51a22] group relative overflow-hidden active:scale-95"
+                    className="w-full border-2 border-[#1ba51a] py-3 uppercase font-bold text-sm tracking-[0.3em] hover:bg-[#1ba51a] hover:text-black transition-all shadow-[0_0_20px_#1ba51a22] group relative overflow-hidden active:scale-95"
                 >
-                    <span className="relative z-10">[MATRIX_MARKETPLACE]</span>
+                    <span className="relative z-10">[MARKETPLACE]</span>
                     <div className="absolute inset-x-0 bottom-0 h-1 bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                 </button>
             </div>

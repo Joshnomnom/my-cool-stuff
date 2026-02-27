@@ -68,7 +68,7 @@ export default function MatrixInventoryModal({
             <div className="mt-auto flex flex-col gap-2">
                 <button
                     onClick={() => {
-                        playSound?.("CLICK");
+                        playSound?.(item.location === "mining" ? "MINING_UNLINK" : "MINING_LINK");
                         onToggleMining?.(item.id);
                     }}
                     className={`py-2 text-[9px] font-bold uppercase transition-all ${item.location === "mining"
@@ -80,7 +80,7 @@ export default function MatrixInventoryModal({
                 </button>
                 <button
                     onClick={() => {
-                        playSound?.("CLICK");
+                        playSound?.("SELL");
                         onDeleteItem?.(item.id);
                     }}
                     className="text-[8px] opacity-40 hover:opacity-100 hover:text-red-500 uppercase transition-all"

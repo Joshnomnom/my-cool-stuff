@@ -4,16 +4,23 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 // SFX Asset Mapping
 const SFX_LIBRARY = {
+    // ── UI Actions ──────────────────────────────────────────────────────────
     CLICK: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3",
-    ROLL: "https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3",
-    UPGRADE: "https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3",
-    COMMON: "https://assets.mixkit.co/active_storage/sfx/2569/2569-preview.mp3",
-    RARE: "https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3",
-    EPIC: "https://assets.mixkit.co/active_storage/sfx/2575/2575-preview.mp3",
-    ULTRA_RARE: "https://assets.mixkit.co/active_storage/sfx/2578/2578-preview.mp3",
-    MYTHIC: "https://assets.mixkit.co/active_storage/sfx/2580/2580-preview.mp3",
-    LEGENDARY: "https://assets.mixkit.co/active_storage/sfx/2582/2582-preview.mp3",
-    ANOMALY: "https://assets.mixkit.co/active_storage/sfx/2585/2585-preview.mp3",
+    ROLL: "https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3",  // rapid tick during gacha spin
+    ROLL_REVEAL: "https://assets.mixkit.co/active_storage/sfx/2620/2620-preview.mp3",  // final reveal burst
+    UPGRADE: "https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3",  // upgrade commit
+    SETUP: "https://assets.mixkit.co/active_storage/sfx/2594/2594-preview.mp3",  // link / setup confirm
+    SELL: "https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3",  // coin exchange / sell
+    MINING_LINK: "https://assets.mixkit.co/active_storage/sfx/2607/2607-preview.mp3",  // item linked to mining
+    MINING_UNLINK: "https://assets.mixkit.co/active_storage/sfx/2576/2576-preview.mp3",  // item removed from mining
+    // ── Rarity Reveals ──────────────────────────────────────────────────────
+    COMMON: "https://assets.mixkit.co/active_storage/sfx/2569/2569-preview.mp3",  // quiet blip
+    RARE: "https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3",  // soft chime
+    EPIC: "https://assets.mixkit.co/active_storage/sfx/2619/2619-preview.mp3",  // electric zap
+    ULTRA_RARE: "https://assets.mixkit.co/active_storage/sfx/2618/2618-preview.mp3",  // power surge
+    MYTHIC: "https://assets.mixkit.co/active_storage/sfx/2625/2625-preview.mp3",  // cosmic impact
+    LEGENDARY: "https://assets.mixkit.co/active_storage/sfx/2582/2582-preview.mp3",  // triumphant fanfare
+    ANOMALY: "https://assets.mixkit.co/active_storage/sfx/2585/2585-preview.mp3",  // glitch burst
 };
 
 // Music Cycle Playlist
