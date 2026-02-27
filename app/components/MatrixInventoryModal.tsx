@@ -9,7 +9,7 @@ interface GachaItem {
     description: string;
     miningRate: number;
     sellValue: number;
-    isMining?: boolean;
+    location: "storage" | "mining";
 }
 
 interface MatrixInventoryModalProps {
@@ -17,8 +17,10 @@ interface MatrixInventoryModalProps {
     onClose: () => void;
     items: GachaItem[];
     currency: number;
-    onDeleteItem?: (index: number) => void;
-    onToggleMining?: (index: number) => void;
+    onDeleteItem?: (id: string) => void;
+    onToggleMining?: (id: string) => void;
+    yieldPulse?: { id: number; amount: number } | null;
+    playSound?: (type: any) => void;
 }
 
 export default function MatrixInventoryModal({
@@ -27,11 +29,15 @@ export default function MatrixInventoryModal({
     items,
     currency,
     onDeleteItem,
-    onToggleMining
+    onToggleMining,
+    yieldPulse,
+    playSound
 }: MatrixInventoryModalProps) {
     if (!isOpen) return null;
 
-    const activeMiningCount = items.filter(i => i.isMining).length;
+    const activeThreads = items.filter(i => i.location === "mining");
+    const storageItems = items.filter(i => i.location === "storage");
+    const totalYield = activeThreads.reduce((sum, item) => sum + (item.miningRate || 0), 0);
 
     const rarityColors = {
         COMMON: "#1ba51a66",
@@ -43,107 +49,130 @@ export default function MatrixInventoryModal({
         ANOMALY: "#ffffff",
     };
 
+    const ItemCard = ({ item }: { item: GachaItem }) => (
+        <div className="border-2 border-[#1ba51a22] p-4 bg-[#051105] hover:border-[#1ba51a] transition-all group relative overflow-hidden flex flex-col">
+            <div className="flex justify-between items-start mb-2">
+                <span
+                    className="text-[9px] font-bold px-2 py-0.5 border"
+                    style={{ borderColor: rarityColors[item.rarity], color: rarityColors[item.rarity], backgroundColor: `${rarityColors[item.rarity]}11` }}
+                >
+                    {item.rarity}
+                </span>
+                <div className="text-right">
+                    <span className="text-[10px] font-bold text-[#1ba51a]">+{item.miningRate} B/s</span>
+                </div>
+            </div>
+            <h3 className="text-lg font-bold mb-1 group-hover:text-white transition-colors">{item.name}</h3>
+            <p className="text-[10px] opacity-40 italic h-6 line-clamp-1 mb-4">{item.description}</p>
+
+            <div className="mt-auto flex flex-col gap-2">
+                <button
+                    onClick={() => {
+                        playSound?.("CLICK");
+                        onToggleMining?.(item.id);
+                    }}
+                    className={`py-2 text-[9px] font-bold uppercase transition-all ${item.location === "mining"
+                        ? "bg-[#1ba51a] text-black"
+                        : "border border-[#1ba51a44] text-[#1ba51a] hover:border-[#1ba51a]"
+                        }`}
+                >
+                    {item.location === "mining" ? "[UNLINK_THREAD]" : "[LINK_TO_MINING]"}
+                </button>
+                <button
+                    onClick={() => {
+                        playSound?.("CLICK");
+                        onDeleteItem?.(item.id);
+                    }}
+                    className="text-[8px] opacity-40 hover:opacity-100 hover:text-red-500 uppercase transition-all"
+                >
+                    [EXCHANGE: {item.sellValue} BITS]
+                </button>
+            </div>
+        </div>
+    );
+
     return (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
-            <div className="w-full max-w-4xl max-h-[80vh] border-4 border-[#1ba51a] bg-black p-8 shadow-[0_0_50px_#1ba51a44] relative overflow-hidden flex flex-col">
+            <div className="w-full max-w-5xl h-[85vh] border-4 border-[#1ba51a] bg-black p-8 shadow-[0_0_50px_#1ba51a44] relative overflow-hidden flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-end border-b-2 border-[#1ba51a] mb-8 pb-4">
-                    <div className="flex justify-between items-end w-full">
-                        <div className="flex flex-col">
-                            <h2 className="text-3xl font-bold tracking-[0.2em] uppercase italic bg-gradient-to-r from-[#1ba51a] to-[#4285f4] bg-clip-text text-transparent">
-                                Personalized_Inventory
-                            </h2>
-                            <div className="text-[10px] opacity-40 mt-1 flex items-center gap-4">
-                                <span>TOTAL_RECORDS: {items.length}/25</span>
-                                <span className={`${activeMiningCount >= 5 ? "text-[#f4b400]" : "text-[#1ba51a]"}`}>
-                                    ACTIVE_LINKS: {activeMiningCount}/5
-                                </span>
-                                <span className="text-[#1ba51a]">TOTAL_STAKED_YIELD: +{items.filter(i => i.isMining).reduce((sum, item) => sum + (item.miningRate || 0), 0).toFixed(1)} BITS/s</span>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-[10px] uppercase opacity-50 mb-1">Available_Bits:</div>
-                            <div className="text-2xl font-bold text-[#f4b400] drop-shadow-[0_0_10px_#f4b40044]">
-                                {Math.floor(currency)} ⌬
-                            </div>
+                <div className="flex justify-between items-start border-b-2 border-[#1ba51a] mb-6 pb-4">
+                    <div className="flex flex-col">
+                        <h2 className="text-4xl font-bold tracking-[0.2em] uppercase italic text-[#1ba51a]">Neural_Threads</h2>
+                        <div className="text-[10px] opacity-40 mt-1 uppercase flex gap-4">
+                            <span>Sector_Yield: <span className="text-[#1ba51a] font-bold">+{totalYield.toFixed(1)} BITS/s</span></span>
+                            <span>Active_Links: <span className={activeThreads.length >= 5 ? "text-[#f4b400]" : "text-[#1ba51a]"}>{activeThreads.length}/5</span></span>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="text-[#1ba51a] hover:text-white transition-colors uppercase text-xs font-bold border border-[#1ba51a] px-4 py-1"
-                    >
-                        [CLOSE_UPLINK]
+                    <button onClick={onClose} className="border border-[#1ba51a] px-6 py-2 text-xs hover:bg-[#1ba51a] hover:text-black transition-all font-bold">
+                        [DISCONNECT_HUD]
                     </button>
                 </div>
 
-                {/* Grid */}
-                <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar">
-                    {items.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center opacity-30 italic py-20">
-                            <p className="text-xl mb-2">SCANNING_RECORDS...</p>
-                            <p className="text-sm">NO_DATA_FOUND_IN_LOCAL_SECTOR</p>
+                <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-10 custom-scrollbar">
+                    {/* Active Mining Section */}
+                    <section className="relative">
+                        <div className="flex items-center gap-4 mb-4">
+                            <h3 className="text-sm font-bold uppercase tracking-widest text-[#f4b400]">/// ACTIVE_MINING_GRID</h3>
+                            <div className="h-px flex-1 bg-[#f4b40022]" />
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {items.map((item, index) => (
-                                <div
-                                    key={`${item.id}-${index}`}
-                                    className="border-2 border-[#1ba51a22] p-4 bg-[#051105] hover:border-[#1ba51a] transition-all group relative overflow-hidden"
-                                >
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div className="flex flex-col gap-1">
-                                            <span className="text-[10px] font-bold px-2 py-0.5 w-fit" style={{ backgroundColor: `${rarityColors[item.rarity]}33`, color: rarityColors[item.rarity] }}>
-                                                {item.rarity}
-                                            </span>
-                                            {item.isMining && (
-                                                <span className="text-[7px] font-bold bg-[#1ba51a] text-black px-1.5 py-0.5 tracking-[0.2em] animate-pulse">
-                                                    LINKED_ACTIVE
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-[9px] font-bold" style={{ color: rarityColors[item.rarity] }}>+{item.miningRate} BITS/s</div>
-                                            <div className="text-[7px] opacity-30 mt-0.5">#ID_{item.id.slice(0, 4)}</div>
-                                        </div>
-                                    </div>
-                                    <h3 className="text-lg font-bold mb-1 group-hover:text-white transition-colors">{item.name}</h3>
-                                    <p className="text-[10px] opacity-60 leading-relaxed italic mb-4 h-8 line-clamp-2">{item.description}</p>
 
-                                    <div className="mt-auto pt-4 border-t border-[#1ba51a11] flex flex-col gap-2">
-                                        <button
-                                            onClick={() => onToggleMining?.(index)}
-                                            disabled={!item.isMining && activeMiningCount >= 5}
-                                            className={`text-[8px] font-bold uppercase tracking-widest px-3 py-2 border transition-all flex items-center justify-center gap-2 ${item.isMining
-                                                ? "bg-[#1ba51a22] border-[#1ba51a] text-white shadow-[0_0_10px_#1ba51a44]"
-                                                : "bg-black border-[#1ba51a44] text-[#1ba51a] hover:border-[#1ba51a] disabled:opacity-20"
-                                                }`}
-                                        >
-                                            <span className={item.isMining ? "animate-spin-slow" : ""}>⌬</span>
-                                            {item.isMining ? "[UNLINK_NEURAL_THREAD]" : "[LINK_NEURAL_THREAD]"}
-                                        </button>
+                        {/* Localized Pulse Animation */}
+                        {yieldPulse && (
+                            <div
+                                key={yieldPulse.id}
+                                className="absolute top-0 right-0 pointer-events-none z-50 flex items-center gap-2 font-black text-[#f4b400] text-2xl animate-modal-yield-float"
+                            >
+                                <span className="opacity-50 text-xs">⌬</span>
+                                +{yieldPulse.amount.toFixed(1)}
+                                <style>{`
+                                    @keyframes modal-yield-float {
+                                        0% { opacity: 0; transform: translateY(0) scale(0.8); }
+                                        20% { opacity: 1; transform: translateY(-10px) scale(1.1); }
+                                        100% { opacity: 0; transform: translateY(-40px) scale(1.1); }
+                                    }
+                                    .animate-modal-yield-float { animation: modal-yield-float 1.5s ease-out forwards; }
+                                `}</style>
+                            </div>
+                        )}
 
-                                        <button
-                                            onClick={() => onDeleteItem?.(index)}
-                                            className="text-[8px] font-bold text-red-500/60 hover:text-red-500 uppercase tracking-widest px-3 py-1.5 border border-red-900/20 hover:border-red-500/40 bg-red-950/05 transition-all text-center"
-                                        >
-                                            [EXCHANGE_FOR_{item.sellValue}_BITS]
-                                        </button>
-                                    </div>
-
-                                    {/* Subtle Glitch Decoration */}
-                                    <div className="absolute top-0 right-0 w-8 h-8 opacity-0 group-hover:opacity-10 pointer-events-none">
-                                        <div className="absolute top-0 right-0 border-t-2 border-r-2 border-[#1ba51a] w-full h-full" />
-                                    </div>
+                        {activeThreads.length === 0 ? (
+                            <div className="p-8 border border-dashed border-[#1ba51a22] text-center opacity-20 text-[10px] uppercase bg-[#1ba51a05]">
+                                No_Active_Links_Detected. Connect_Data_To_Process_Bits.
+                            </div>
+                        ) : (
+                            <div className="relative p-6 bg-[#f4b40005] border border-[#f4b40011] rounded-lg shadow-[inset_0_0_30px_rgba(244,180,0,0.02)]">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                                    {activeThreads.map(item => <ItemCard key={item.id} item={item} />)}
                                 </div>
-                            ))}
+                                <div className="absolute -top-2 left-4 px-2 bg-black text-[8px] font-black text-[#f4b40011] uppercase tracking-[0.3em]">
+                                    Direct_Neural_Bandwidth
+                                </div>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* Industrial Storage Section */}
+                    <section>
+                        <div className="flex items-center gap-4 mb-4">
+                            <h3 className="text-sm font-bold uppercase tracking-widest opacity-60">/// NEURAL_BUFFER_STORAGE</h3>
+                            <div className="h-px flex-1 bg-[#1ba51a11]" />
+                            <span className="text-[10px] opacity-40 font-bold">{storageItems.length}/25 RECORDS</span>
                         </div>
-                    )}
+                        {storageItems.length === 0 ? (
+                            <div className="p-8 border border-dashed border-[#1ba51a22] text-center opacity-20 text-[10px] uppercase">
+                                Neural_Buffer_Empty. Requisition_Data_At_Marketplace.
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                                {storageItems.map(item => <ItemCard key={item.id} item={item} />)}
+                            </div>
+                        )}
+                    </section>
                 </div>
 
-                {/* Footer Decor */}
-                <div className="mt-8 pt-4 border-t border-[#1ba51a22] flex justify-between items-center text-[8px] opacity-30 italic">
-                    <span>{items.length} RECORD(S)_RETRIEVED</span>
-                    <span>ENCRYPTION: AES-256-QUANTUM</span>
+                {/* Footer Deco */}
+                <div className="absolute bottom-4 left-8 text-[8px] opacity-30 uppercase tracking-[0.5em] font-bold">
+                    System_Architecture_V4.0 // High_Throughput_Recollection
                 </div>
 
                 {/* Matrix Background Overlays */}
@@ -152,18 +181,10 @@ export default function MatrixInventoryModal({
             </div>
 
             <style jsx>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 4px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #1ba51a44;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #1ba51a;
-                }
+                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #1ba51a33; border-radius: 2px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #1ba51a; }
             `}</style>
         </div>
     );
